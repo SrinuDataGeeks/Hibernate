@@ -1,0 +1,419 @@
+Enterprice Application :-
+**********************
+Enterprice Application is a Bussiness Application contains complex and heavtweight Bussiness logics.
+
+Ex:Bank Application's,
+   Insurance Application's,
+   Employee Payroll application's,
+   Online Store Application's  like FlipKart, Amezon etc..   
+
+
+**The untimate goal of an Enterprice Application is to manupulate the Bussiness Data.
+**But the Bussiness Data is available in the Database.
+**Database represents the data in the form of Relational-format.
+**But the Java represents the data in the form of Object Orientation.
+**These two are different technologies they can not communicate each other directly so that we can use "JDBC".
+Jdbc Tech Drawbacks :-
+*******************
+1. Increases boiler plate coding hence testing application becomes complex.
+	
+=>In Jdbc For every DB interaction following operations we should do
+	**creating a Connection Object.
+	**creating a Statement Object.
+	**Binding the parameters
+	**Submiting the Query.
+	**Processing the result.
+	**Handling the Exception's.
+	**Releasing the Resources  such as closing connection object,Statement object etc..
+
+   
+2.We are hardcoding the SQL Statements so that the Jdbc Persistence logic becomes Database dependent.
+
+3.If we migrate the database we should  do the modification in JdbcPersistence logic.
+Which leads to the maintanance problem.
+
+4.Writing SQL query could be very complex...
+
+5.There are mismatches between Object Orientation and Relational Representation of a Data. Those can not be resolved by JDBCTechnology.
+
+
+All these drwabacks can be addressed by 
+"Object Relational Mapping" (ORM).
+
+"Object Relational Mapping" (ORM) :-
+*********************************
+
+Object Relational Mapping is a specification. Which defines the following rule.
+
+
+Represents the relational data in the form of Object Orientation and maintains the synchronization between them.
+Maintaining the synchronization means when ever we do the modification within the object those changes will automatically reflected with the table and vice versa.
+
+Hiberante is an implementation of ORM specification. 
+
+Hiberante is a ORM tool.
+
+refer ORM diagram
+
+POJO Class :-
+************
+Plain Old Java Object (POJO)  :-
+
+=>Which ever java class Object lifecycle can be maintaned by the JVM then that java class can be called as POJO.
+
+=>In Simple whatever java class that we can run on JVM directly that java class can be called as POJO class.
+
+
+class  Sample 
+{
+.....
+.....
+}//POJO
+
+class Test implements java.io.Serializable
+{
+.....
+....
+}///POJO
+
+=> Here the Test class is also a POJO class. If any class which is implementing  Serializable interface those object's can be treated as Serializable Object's by the JVM.
+
+=>All these Serializable object's can be maintained over the network.
+
+class   SampleTest implements javax.servlet.Servlet
+{
+.....
+.....
+}// Not a POJO class
+
+Here the "SampleTest" is a Servlet programe. A Servlet Program life cycle can not be maintained by the JVM so that "SampleTest" is not a POJO class.
+
+
+Understanding Persistence Class :-
+*******************************
+=>Persistence Class is a Object Oriented Representation of a Relational table.
+=>The Persistence class is a POJO class.
+=>The Persistence class Object Life cycle can be maintained by the Hibernate Engine.
+
+Rules to develop a Persistence Class
+*************************************
+=> The Persistence class should be public and must be a sub class of Serializable interface.
+
+	Because the database  table record is avaialable to us in the form of Persistence class Object. So that if the Persistence class object is a child class of "java.io.Serializable" interface we maintain over the network.
+
+
+=>How many columns are there in the database table those many instance variables we need to define within the Persistence class.
+	Here the column name's and instance variable name's need not be same but the Data type should be same.
+
+=>The Hibernate Engine creates a Persistence class object using Default Constructor. so that  a persistence class should contain a default constructor.
+
+=>Within the Persistence class for every instance variable we need to define related setters and getter methods.
+	The Setter method's are used by the Hinbernate Engine to set the information in the Object.
+
+	The gettter method's are used by the Java programmer to access the information from the object.
+
+=>Within the Persistence class we should define one field as an indentifier field and that should map to the Primary Key column of a Database table.
+
+=>The Persistence class should not be a final.
+	Because Hibernate Engine creates a Proxy for every Persistence class object.
+	Using Proxy's only Hibernate Engine communicates with the database.
+	Because of Proxy's only Hibernate Engine can maintain the Sychronization between object and table.
+
+Proxy :-
+******
+	Proxy is duplicate representation of a Orginal Object.
+	Hibernate create a Proxy  by just extending  a persistence class.
+
+If we declare a persistence class as "final" Hibernate Enginte can not able to create a Proxy.
+
+
+ Create a following table in DB:-
+**************************************
+Drop Table Employee;
+create table Employee(empNo  number(10) Primary Key,empName varchar2(20),empSal number(10,2));
+
+Persistence Class :-
+******************
+EmployeeBean.java
+
+package com.test;
+public class EmployeeBean implements java.io.Serializable	
+{
+private int empNo;
+private String empName;
+private float empSal;
+
+public EmployeeBean()
+ {
+System.out.println("\n\n EmployeeBean object is created");
+ }
+
+public void setEmpNo(int empNo){
+this.empNo=empNo;
+}
+
+public int getEmpNo()
+	{
+return empNo;
+	}
+
+
+public void setEmpName(String empName)	
+	{
+this.empName=empName;
+	}
+public String getEmpName()
+	{
+return empName;
+	}
+
+public void setEmpSal(float empSal)
+	{
+this.empSal=empSal;
+	}
+public float getEmpSal()	
+{
+return empSal;
+}
+   }
+
+Hibernate Mapping File :-
+**********************
+=> Hibernate Mapping File is an xml file which describes the information about the persistence class and the database table.
+
+=>HibernateEngine reads the mapping file for understanding table and persistence class.
+
+=>According to the industry standards for every persistence class we need to define one mapping file.
+
+=>The mapping file name should be "PersistenceClassName.hbm.xml".
+
+EmployeeBean.hbm.xml
+********************
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"  
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+
+<class name="com.test.EmployeeBean"  table="EMPLOYEE">
+
+<id name="empNo" column="EMPNO" > </id>
+
+<property name="empName" column="EMPNAME"> </property>
+
+<property name="empSal"  column="EMPSAL"> </property>
+
+</class>
+
+</hibernate-mapping>
+
+***************
+
+Here the "<hibernate-mapping> is the root element.
+
+To map class with the table  we use "<class>" class.
+
+The "<id>" tag can be used to configure identifier field of a  persistence class.
+
+The "<property>" can be used to map instance variable with the table column's.
+
+Note :-
+******
+All these tags are defined in Hibernate DocType.
+We can copy doctype from "HiberanteJar" folder =>
+Open "hibernate.hbm.xml" file then we can find the doctype copy and paste it in Mapping file.
+
+
+Hibernate Configuration File :-
+****************************
+=> Hibernate Configuration File contains the inforamation about database details.
+such as what is username,password,url,driver_class etc..
+
+=>Hibernate Engine uses this configuration file to interact with the Database.
+
+=>In generally we will maintain seperate configuration file for every Database.
+
+=> Usually the configuration file name will be databasename.cfg.xml
+
+oracle.cfg.xml
+*****************
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+<session-factory>
+
+
+<property name="connectoin.username">system</property>
+<property name="connection.password">system</property>
+<property name="connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+<property name="url">jdbc:oracle:thin:@localhost:1521:XE</property>
+
+<property name="show_sql">true</property>
+
+<property name="dialect">org.hibernate.dialect.Oracle10gDialect</property>
+
+<mapping resource="Employee.hbm.xml" />
+
+</session-factory>
+</hibernate-configuration>
+
+
+****************************
+
+
+<hibernate-configuration> tag is root element under we need have <session-factory> tag.
+
+Within <session-factory> tag we will configure all the DBdetails.
+
+Dialect class :-
+***************
+	Hibernate Framework developers has given a seperate dialect class for every database.
+	A Dialect class containes the database specific syntactical information.
+	Hibernate Engine uses this dialect class to generate the database related SQL query.	
+
+All these dialect classes were defined in "org.hibernate.dialect" package.
+
+DataBase		DialectClass
+
+Oracle(9i and
+above versions)   org.hibernate.dialect.Oracle9Dialect
+
+MYSQL 		  org.hibernate.dialect.MySQLDialect
+
+etc..
+
+
+<mapping> tag:-
+************
+	Actually Hibernate Engine reads confguration file so that we should configure hibernate mapping files within the configuration file.
+
+	<mapping> tag can be used to configure the mapping file's.
+
+property "show_sql":-
+*******************
+`	If we configure "show_sql" property as true we can see the Hibernate Engine generated SQL Query in the console.
+
+*************************
+
+
+Understanding Hibernate API :- 
+**************************** 
+
+org.hibernate.cfg.Configuration :-
+******************************** 
+=> The "Configuration" is a java class given by Hibernate Framework developers.
+	When we create the "Configuration" object then the HibernateEngine will be activated.
+
+	Configuration cfg=new Configuration(); 
+
+=>The "Configuration" class contains the "public void configure(String)" method which can load the hibernate configuration, mapping files into the memory then make it available to the Hibernate Engine.
+
+	cfg.configure("oracle.cfg.xml");
+
+
+=>On the "Configuration" object when we call the "public SessionFactory buildSessionFactory()" method the Hibernate Engine does the following jobs.
+
+	**Creates the Connection pool.
+	**To represent the Connection Pool Hibernate Engine creates a "SessionFactory" object and returns to us.
+	**In Hibernate the Connection Pool is avialable to us in the form of "SessionFactory".
+
+SessionFactory sf=cfg.buildSessionFactory();
+
+org.hibernate.SessionFactory :-
+****************************
+=>In Hibernate the SessionFactory object is a heavy weight object. 
+=>Because the SessionFactory object representing connection pool.
+=>The SessionFactory object should not be create for every client request.
+=>We should make the "SessionFactory" object as Single ton Object.
+=>org.hibernate.SessionFactory is an interface. SessionFactory object means one of it's implentation class object.
+
+refer SessionFactory diagram
+-======
+
+org.hibernate.Session :-
+*********************
+=> org.hibernate.Session is an interface.
+=>In hibernate the "Session" can be act as a mediater between the Hibernate Persistence logic and the Database.
+=>In hibernate if we want to interact with the database that can be possible only through "org.hibernate.Session" object.
+=>When we call "public Session openSession()" method on the "SessionFactory".
+
+	The SessionFactory get's the connection object from the connection pool .
+	Intercepts the "Connection" object into the "Session" object. 
+	Finally returns the "Session" object to us.
+
+	Session s = sf.openSession();
+
+=>Here the "Session" Object is a light weight object.
+=>We need to create a Session object for every client request.
+=>The area between opening a Session and Closing the Session can be called as "Session-Area" or "Persistence-Area".
+=>Within a "Session-Area" or "Persistence-Area" there can be a sychronization between Persistence class object and the database table.
+
+Refer HBFlow diagram !!!
+*********************
+
+Connection Pool :-
+*****************
+Connection Pool contains a collection of Connection object's.
+All the Connection object's of a Connection Pool represents single database.
+In generally for every database we will maitain one connection pool.
+
+Procedure to implement Hibernate Application :-
+*********************************************
+=> Create a table.
+=>Develop the persistence class.
+=>Develop the mapping file.
+=>Develop the Configuration file.
+=>Within the application making use of HibernateAPI for implementing Hibernate Persistence logic.
+
+Selecting a Record From the table using Hibernate :-
+**************************************************
+Sql Script :-
+**********
+drop table Employee;
+create table Employee(empNo  number(10) Primary Key,empName varchar2(20),empSal number(10,2));
+insert into Employee values(1242,'Srinu',5000);
+commit;
+
+
+
+EmployeeBean.java
+EmployeeBean.hbm.xml
+oracle.cfg.xml
+SelectEmployeeDAO.java
+
+*******************************
+
+
+TransactionManagement :-
+*********************
+TransactionManagement is a concept of grouping all the related jobs togather and executing them as a Single unit.
+
+	If any one of the job execution is failed we should rollback the traction otherwise we can commit transaction.
+
+=>Hibernate has given "org.hibernate.Transaction" interface.
+
+=> The "org.hibernate.Transaction" object will maintaines the bounderies of the transaction.
+
+=>In Simple TransactionManagement means maintaining the bounderies of the transaction.
+
+=> On the "org.hibernate.Session" object when we call "public Transaction beginTransaction()" method ,
+The "Session" will return the "Transaction" object.
+
+=>  The "org.hibernate.Transaction" has given follwing methods which can be used to maintain the bounderies of a transaction.
+
+public void commit() :-  Commit's the transaction.
+
+public void rollback() :- Rollback's the transaction.
+
+
+In Hibernate all the Non-Select operations should be done within the Tranasaction Context area otherwise Hiberanate does not generate sql queries.
+
+=====>
+
+Syncronization Application
+
+refer SychronizationEmployeeDAO.java
+
+

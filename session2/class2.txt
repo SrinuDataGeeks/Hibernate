@@ -1,0 +1,71 @@
+Understanding "Session-Level Cache " :-
+***********************************
+=> For every "org.hibernate.Session" Hibernate-Engine will creates a "Session-Level Cache".
+
+=> "Cache" is nothing but a temporary memory area.
+
+=>Within the "Session-Level Cache" Hibernate Engine will maintains the proxy's.
+
+=>For every persistence class object Hibernate Engine will maintain a proxy within the SessionLevel cache.
+
+=>Because of Proxy's only Hibernate Engine maintains the Sychronization with the table and the Persitence class object.
+
+=>When we do the modification on the persistence class object those chages will be reflected on the Proxy.
+
+=>When there is a change within the Proxy then Hibernate Engine submits the Sql query to the table.
+
+=>Within the Same Session if we make a same request more than once. For first time only the select query will be submited.
+	From the second time onwards Hibernate Engine directly returns the object from the Session Level Cache.
+
+This technique can be called as "Caching Mechnism".
+
+=>In Hibernate implicitly the "Session-Level Caching mechanism" will be enabled.
+
+SessionLevelChacheEmployeeDAO.java
+*********************************
+=>Observe the Output for Emp1 Select query is submited.
+
+=>For Emp2 no select query submited by the Hibernate Engine.
+
+Advantages of  Proxy's :-
+***********************
+=>Makes a Sychronization between persistence class object and table.
+
+=>Makes a loose coupling between persistence class object and the table.
+
+
+
+
+Understanding Persistence class Object Life Cycle :-
+**************************************************
+=> Persistence class Object Life Cycle is maintained by HibernateEngine.
+
+=>The Persistence class object life cycle is devided into Four States.
+
+1.Transient State or New State
+2.Persistence State
+3.Detached State
+4.Removed State
+
+
+Transient State or New State
+****************************
+	Here the Persistence class object contains the data but it is not representing relational record.
+
+	When the Persistence class object  is in Transient State there is no sychronization between the Persistence class object and the database table.
+
+
+Persistence State  :-
+*******************
+Here the Persistence class object contains the data but it is representing relational record.
+
+	When the Persistence class object  is in Persistence State there is a sychronization between the Persistence class object and the database table.
+
+
+
+Detached State  :-
+*******************
+Here the Persistence class object contains the data but  record is deleted from the table.
+
+	When the Persistence class object  is in Detached State there is no sychronization between the Persistence class object and the database table.
+

@@ -1,0 +1,197 @@
+Understanding Removed State :-
+****************************
+=> Here in Removed State the persistence class Object existed and table record also existed but there is no sychronization between persistence class Object and the table record.
+
+=>Because we will remove the Proxy.
+
+=>The proxy can be removed from the "Session-Level Cache" in three ways.
+
+public void evict(Object) :- Removes the perticular    proxy.
+*************************   
+public void clear() :-
+******************
+			Removes all the proxy's from Session-Level Cache.
+
+
+public void close() :-
+********************
+Removes all the proxy's from Session-Level Cache.
+
+The above three methods we need to call on "org.hibernate.Session" object.
+
+
+Understanding Singleton Design Pattern :-
+**************************************
+=>Singleton Design Pattern says when the object state remains same for all the client requests, 
+why we need to create a java class object for every client request instead of that create a java class object only once and make use of the object reference more than once.
+
+Code to implement Singleton Object :-
+*********************************
+=>Declare the private static final variable.
+=>Initialize the static variable in static-block.
+=> make the constructor as private.
+=>Return the object reference from the static factory method.
+
+Samle code :-
+**********
+	public class Sample
+		{
+	private static final Sample obj;
+	static
+	{
+	obj = new Sample();
+	}
+	private Sample()
+	{
+	}
+	public static Sample getSampleObject()
+	{
+return obj;
+	}
+		}
+*****************************************************
+
+In Hibernate SessionFactory object is a heavy weight object. 
+We should not create the SessionFactory object for every client request.
+We Should make SessionFactory object as Singleton object.
+
+Develop a HibernateApplication and make the SessionFactory object as singleton Object :-
+*****************************************
+EmployeeBean.java
+EmployeeBean.hbm.xml
+hibernate.cfg.xml take from previous application
+
+HBUtil.java (This class makes SessionFactory object as 		singleton object)
+
+	Working with SingleRow operations :-
+	**********************************
+Hibernate has given "org.hibernate.Session" methods to work with Single Row operations.
+
+public Object save(Object) throws HibernateException :-
+******************************************************
+=>save(Object) method inserts the record in the table then returns the "Id_Value".
+
+EmployeeBean.java
+EmployeeBean.hbm.xml
+hibernate.cfg.xml take these files from previous Application.
+
+=>save(Object) method coverts persistence class object from Transient State to Persistence State.
+
+=>save(Object) method can also coverts persistence class object from Detached State to Persistence State.
+
+EmployeeDAO.java
+****************
+
+public void persist(Object) throws HibernateException
+******************************************************
+=> The persiste(Object) method also used to insert the record into the table.
+
+=>The persiste(Object) method does not return any id value.
+
+=>The persiste(Object) method can convert persistence object from Transient State to Persistence State.
+
+=>persist(Object) can not save the record when the object is in detached state !!! 
+
+public Object get(Class,Serializable) throws HibernateException
+********************************************
+=>get(Class,Serializable) method can be used to select the record base on the Id value.
+
+=>get(Class,Serializable) method first submits the select query. 
+
+=>If the record is existed creates the Persistence class object then returns to us.
+
+=>If the record is not existed returns the null value.
+
+So "get(Class,Serializable)" method first load's the data then after thinks about the Object creation.
+
+"get(Class,Serializable)" method will all ways performs "Eager Loading".
+
+Sample Code:-
+***********
+EmployeeBean bean=(EmployeeBean)
+		s.get(EmployeeBean.class,1242); //submits the select Query..
+
+	if(bean!=null)
+	{
+	System.out.println("\n\n Employee Object was created\n\n");
+	System.out.println("\n\n EmpName is : "+bean.getEmpName());
+	}else{
+		System.out.println("\n\n Sorry Employee details not found  Object is not created\n\n");
+	}
+
+Note :-
+*****
+What ever object which is written by get(..) method is in Persistence State.
+
+public Object load(Class,Serializable) throws HibernateException
+********************************************
+=>load(Class,Serializable) method can be used to select the record base on the Id value.
+
+=>load(Class,Serializable) method first creates the Persistenc class Object. 
+
+=>When we make a getter method call on the Persistence class Object then submits the select query.
+
+=>If the record is existed in the table then bind the data .
+=>If the record is not existed in the table then the load(Class,Serializable) method throws ObjectNotFoundException.
+
+=>So "load(Class,Serializable)" method first creates the Persistence class Object then after loads the data.
+
+=>"load(Class,Serializable)" method will all ways performs "Lazy Loading".
+
+Sample Code:-
+***********
+EmployeeBean bean=(EmployeeBean)
+		s.load(EmployeeBean.class,1242); 
+//Creates the EmployeeBean object
+	if(bean!=null)
+	{
+	System.out.println("\n\n Employee Object was created\n\n");
+String ename=bean.getEmpName(); //At this time submits the query
+	System.out.println("\n\n EmpName is : "+ename);
+	}else{
+		System.out.println("\n\n Sorry Employee details not found  Object is not created\n\n");
+	}
+
+Note :-
+*****
+What ever object which is written by load(..) method is in Persistence State.
+
+
+public void delete(Object) throws HibernateException :-
+**************************************************
+
+=> delete(Object) method deletes the record when the object is in persistence state.
+
+=>First delete(Object) method submits the select query.
+	If the record is existed then submits the delete query.
+	Otherwise won't submits the delete query.
+
+Sample Code :-
+**********
+EmployeeBean emp=new EmployeeBean();
+emp.setEmpNo(1242);
+SessionFactory factory=HBUtil.getSessionFactory();
+Session s=factory.openSession();
+s.beginTransaction();
+	s.delete(emp);
+	s.getTransaction().commit();
+	s.close();
+	factory.close();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

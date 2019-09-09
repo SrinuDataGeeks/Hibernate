@@ -1,0 +1,481 @@
+public void update(Object ) throws HibernateException
+*****************************************************
+=> The  update(Object) method can be used to update the record on the table.
+
+=>The update(Object) method updates the record the when the record is existed otherwise does not do anything.
+
+Sample Code :-
+*************
+EmployeeBean emp=new EmployeeBean();
+emp.setEmpNo(1100);
+emp.setEmpName("Karthick");
+SessionFactory factory=HBUtil.getSessionFactory();
+Session s=factory.openSession();
+s.beginTransaction();
+s.update(emp);
+	s.getTransaction().commit();
+	s.close();
+	factory.close();
+
+=>Record updation can not be done based on single column. 
+=>HibernateEngine updates all the columns of a table by taking  id value as a criteria value.
+
+=>Hibernate generated Query : update Employee set empName=?, empSal=? where empNo=?
+
+=>Here within the EmployeeBean object we have name as "Kathick" and Id as "1100" and empSal as "0"(default value).
+So that salary also updated as "0".
+
+Note :-
+*****
+It is not recomended to use "update(Object)" method for updating record.
+
+If we want to update the record make use of "Sychronization concept".
+
+=> update(Object) method converts object from transient state to persistence state.
+
+***********************************************
+
+public Object merge(Object) throws HibernateException
+*****************************************************
+=> The merge(Object) first submits the select query.
+	If the record is existed then submits the update query  Otherwise submits the InsertQuery.
+
+=> merge(Object) method converts object from transient state to persistence state.
+
+=>merge(Object) method returns the persistence class object.
+
+public Object saveOrUpdate(Object) throws HibernateException
+*****************************************************
+same as merge(Object) method.
+
+
+=> The saveOrUpdate(Object) will allways creates a Proxy.
+	If the proxy is already existed in the cache then we get "NonUniqueObjectException".
+
+
+=>The merge(Object) first checks the cache, if the proxy existed already them merge with the proxy otherwise create a proxy.
+
+	So that it is allways recomended to make use of "merge(Object)" method.
+
+=> All these "org.hibernate.Session" singlerow methods are overloaded.
+
+=>Ex:-
+  ***
+	1. public Object save(String,Object);	
+	2. public void persist(String,Object);
+	3. public void update(String,Object);
+	etc...
+
+Here the first parameter is "persistence className".
+
+Ex:
+EmployeeBean emp=new EmployeeBean();
+emp.setXXX();
+....
+....
+ session.save("com.nit.EmployeeBean" ,emp);
+ 
+ 
+ understanding flush() method :-
+ ****************************
+ 
+ public void flush() :-
+ *******************
+ => The flush() method is avialable in org.hiberante.Session.
+ 
+ => The flush() moves proxy objects from session level cache to the table. so whenever we call flush() method the sql query will be generated.
+ => ** The flush() method does not commits the data in the database table.
+ 
+ 
+ public void commit() method of "org.hibernate.Transaction" class:-
+ ****************************************************************
+ 
+ => txn.commit() =  flush() + commit() ;
+ 
+ => txn.commit() moves the proxy object's the table and also commits the data.
+
+ Understanding Generator classes :-
+********************************
+=> Generally Hiberante Engine take the Id value as a criteria value to do any operation in database.
+
+=>Hiberante Framework has given generator classes which can able to generate the id value automatically while inserting the record.
+
+=>Every generator class can be identified by one nick name.
+
+=>We will configure this nickname within the mapping file while configuring the "<id>" value using "<generator>" tag.
+
+Ex:-
+***
+<id name="empNo"  column="empNo" >
+<generator class="assigned" />
+</id>
+
+All there generator classes are available in org.hibernate.id package and it's sub packages.
+
+ 
+class_Name		Nick_Name
+
+Assigned			assigned
+IncrementGenerator	increment
+IdentityGenerator	identity
+NativeGenerator		native
+SequeceGenerator	sequence
+HiloGenerator		hilo
+SequeceHiloGenerator    seqhilo
+SelectGenerator		select
+ForiegnGenerator 	foreign
+etc..
+
+=> assigned :-
+   *********
+ **assigned generator the default generator class.
+ **If we don't configure any generator within the mapping file by default generator is assigned.
+ **If we use assigned generator hibernate engine does not generates any id value.
+ **A programmer only should take care about adding id value to the persistence class Object.
+
+EmployeeBean.hbm.xml
+********************
+Doc Type...! 
+<hibernate-mapping>
+<class name="com.nit.EmployeeBean"  table="Employee">
+<id name="empNo"  column="empNo" >
+<generator  class="assigned" >
+</generator>
+</id>
+<property name="empName"  column="empName" >
+</property>
+<property name="empSal"  column="empSal" >
+</property>
+</class>
+</hibernate-mapping>
+
+EmployeeBean.java
+hibernate.cfg.xml
+HBUtil.java
+
+take these file from previous application
+
+increment generator :-
+*******************
+=> If we use "increment" generator the "id_value" is automatically generated by the Hibernate Engine.
+
+=> First Hibernate Engine submits the "select query" gets the maximum id value.
+	Add plus one to that then that becomes the newly generated id value.
+
+=>If we use "increment" generator  the Hiberante Engine does not considers our own id value.
+
+
+=>If there are no records on the database table the id value will starts from "1".
+
+=>"increment" generator does not considers deleted id values.
+
+change the "generator" class name in  EmployeeBean.hbm.xml file then run the EmployeeDAO.java
+
+<id name="empNo"  column="empNo" >
+<generator  class="increment" >
+</generator>
+</id>
+
+
+identity generator :-
+********
+=>"identity" generator is same as "increment" generator.
+=>But in identity the "id_value" is generated by database engine.
+=> Here the database can considers deleted id value also for generating new id.
+=>To use identity we should enable autoincrement property on the column level.
+=>identity generator is not supported by all the databases.
+=>MySQL supports identity generator where as ORACLE does not supports identity generator.
+
+<id name="empNo"  column="empNo" >
+<generator  class="identity" >
+</generator>
+</id>
+
+
+
+"sequence" generator :-
+********************
+
+=> Here the Hibernate Engine uses database sequence to generate the "id_value".
+=> Here the sequence name must me "hibernate_sequence" .
+=>Allways sequence number will starts from "1".
+
+Sql Script :-
+**********
+Delete From Employee;
+commit;
+Create Sequence  hibernate_sequence Increment By 5;
+
+EmployeeBean.hbm.xml
+*********************
+change the "generator" class.
+
+<id name="empNo"  column="empNo" >
+<generator  class="sequence" >
+<param name="sequence">hibernate_sequence</param>
+</generator>
+</id>
+
+=> Here the sequence name can be specified using "<param>" tag. 
+=>Here the param name "sequence" is predefined.
+
+
+"native" generator :-
+********************
+=> The "native" can be act as a "sequence" generator.
+**When we use "native" generator we must create "hibernate_sequence" within the database.
+
+
+
+
+"select" generator :-
+*******************
+"select" generator make use of database triggers to generate the id value.
+
+*** "foriegn" generator :- 
+    *******************
+"foriegn" generator  can be used in "one-to-one" relationship.
+
+
+	Working with Annotations :-
+	*************************
+
+=> Hibernate has given support to work with annotations.
+
+=>Hibernate internally make use of " Java Persistence API" to work with annotations.
+
+=>If we are making use of annotations we no need to develop the "mapping files".
+
+=>The AnnotationConfiguration class supports both xml and annotation configurations.
+
+According the Java Persistence API a persistence class can be treated as an Entity.
+
+All the Java Persistence API annotations are available in "javax.persistence" package .
+
+@Entity :-
+*******  Makes the persistence class as an Entity.
+
+@Table :-  Maps the class with the table.
+****** 
+
+@Id :-
+****** Used to configure the Identifier Field.
+
+@Column :-
+******* Used to maps the instance variable with the column .
+
+When we use annotations we should configure the persistence class within the hiberante configuration file using "<mapping class="..." /> tag
+
+Procedure to work with annotations :-
+***********************************
+1. Delete the EmployeeBean.hbm.xml file.
+2. Make use of annotations in EmployeeBean.java
+3. Configure EmployeeBean.java within hibernate.cfg.xml file.
+4.Write an DAO class for database interaction.
+
+hibernate.cfg.xml
+******************
+
+Remove the previous <mapping> tag then add following one.
+
+<mapping class="com.nit.EmployeeBean" />
+
+EmployeeDAO.java
+*****************
+	Write a code for selecting Employee by EmpNo.
+	
+			Inheriatance Mapping :-
+		********************
+
+Inheriatance Mapping is a concept of mapping hierarchy of java classes with the database tables.
+
+Inheriatance Mapping can be done in three ways
+
+	1. Table Per Hirarchy
+	2. Table per Concrete class
+	3. Table Per Subclass
+
+Table Per Hirarchy :-
+******************
+=> In case of Table Per Hirarchy we will map complete Hirarchy with the single table.
+
+=> To identify the record we will take an additional column in TablePerHirarchy that is "DisciminatorColumn" .
+
+=>We will configure "DisciminatorColumn"  within the mapping file using "<discriminator>" tag.
+
+=> "<discriminator>" tag should be configured after the "<id>" tag.
+Ex:-
+***
+<discriminator column="Emp_Type" type="string"></discriminator>
+
+=> Here the type "string" is Hibernate datatype .
+=>All the Hibernate data types are in lowyer case.
+
+=>We can pass values to the "DisciminatorColumn" from the mapping file using "discriminator-value" attribute.
+
+=>In Table Per Hirarchy we will configure child classes within the mapping file using "<subclass>" tag.
+***************************************************
+sql script :-
+**********
+Drop Table EmployeeTPH;
+create table EmployeeTPH(empId number(10) Primary Key,empName varchar2(10),salary number(10,2),bonus number(10,2),contractPeriod varchar2(10),payPerHour number(10,2),Emp_Type varchar2(10));
+
+	Working with annotations :-
+	*************************
+
+@Inheritance :-
+*************
+	This annotation can be used to configure the type of the inheritance.set cse
+
+javax.persistence.InheritanceType :-
+*********************************
+This class contains public static final variables,which defines the Type of the inheritance.
+
+public final class InheritanceType extends ..  {
+  public static final InheritanceType SINGLE_TABLE;
+  public static final InheritanceType TABLE_PER_CLASS;
+  public static final InheritanceType JOINED;
+  ...
+}
+
+To map TablePerHirarchy we use SINGLE_TABLE 
+To map TablePerConcreate class we use TABLE_PER_CLASS
+To map TablePerSubclass we use JOINED as an inheritance type's.
+
+****************************************************
+	TablePerHirarchy using annotations :-
+	**********************************
+
+sql script :-
+***********	
+	delete from EmployeeTPH;
+	commit;
+
+@DiscriminatorColumn :- Used to specify Discrimincator column.
+
+@DiscriminatorValue :-Used to pass DiscriminatorValue
+
+hibernate.cfg.xml
+*****************
+...
+<mapping class="com.nit.Employee" />
+<mapping class="com.nit.RegularEmployee" />
+<mapping class="com.nit.ContractEmployee" />
+...
+
+HBUtil.java
+EmployeDAO.java are same as in previous app.
+
+Drawback of TablePerHirarchy :-
+****************************
+=> Nullable values will be stored in database table.
+
+		TablePerConcrete Class :-
+		**********************
+=> In TablePerConcrete Class we will take a seperate table for every java class within a hirarchy.
+
+=>In TablePerConcrete class every child class can be configured using "<union-subclass>" tag within the mapping file.
+
+sql script :-
+**********
+Drop Table ContractEmployeeTPC;
+Drop Table RegularEmployeeTPC;
+Drop Table EmployeeTPC;
+create table EmployeeTPC(empId number(10) Primary Key,empName varchar2(10));
+create table RegularEmployeeTPC(empId number(10) Primary Key,empName varchar2(10),salary number(10,2),bonus number(10,2));
+create table ContractEmployeeTPC(empId number(10) Primary Key,empName varchar2(10),contractPeriod varchar2(10),payPerHour number(10,2));
+
+Empoyee.java
+RegularEmployee.java
+ContractEmployee.java
+hibernate.cfg.xml
+HBUtil.java
+EmployeeDAO.java take all these files from TPH 1st application.
+
+TablePerConcreate class using annotations :-
+*****************************************
+=> In the parent class we will configure the type of the inheritance using @Inheritance annotation.
+
+=>In the Child classes we need to configure the parent class overridden attributes using @AttributeOverride annotation.
+
+=> @AttributeOverride(name="attrName" , column=@Column(name=""))
+
+=>We will group all the attributes togather using @AttributeOverrides.
+
+Syntax :-
+*******
+@AttributeOverrides
+	(
+{
+@AttributeOverride(..),
+@AttributeOverride(..)
+}
+	)
+
+hibernate.cfg.xml
+****************
+<mapping class="com.nit.Employee" />
+<mapping class="com.nit.RegularEmployee" />
+<mapping class="com.nit.ContractEmployee" />
+
+=> delete From EmloyeeTPC;
+   delete From RegularEmloyeeTPC;
+   delete From ContractEmloyeeTPC;
+	commit;
+=>HBUtil.java,EmployeeDAO.java take these two from previous application.
+
+=>Run the EmployeeDAO.
+
+Drawback of TabelPerConcreteClass :-
+*****************************
+Duplicate column's will be repeated in the child table.
+
+		TablePerSubClass( ** ) :-
+		**********************
+=> In TablePerSubClass we can maintain Primary Key and Foreign Key relationships between parent and child table.
+
+=> So that we can avoid nullable values and duplicate columns.
+
+SQL Scrtipt :-
+************
+
+Drop Table ContractEmployeeTPS;
+Drop Table RegularEmployeeTPS;
+Drop Table EmployeeTPS;
+create table EmployeeTPS(empId number(10) Primary Key,empName varchar2(10));
+create table RegularEmployeeTPS(Emp_Fk_Id number(10) references EmployeeTPS(empId),salary number(10,2),bonus number(10,2));
+create table ContractEmployeeTPS(Emp_Fk_Id number(10) references EmployeeTPS(empId),contractPeriod varchar2(10),payPerHour number(10,2));
+
+=>To workwith "TablePerSubclass" within the mappingfile to configure sub class we should use
+ "<joined-subclass>".
+
+=>To specify the foreign key of a child class we can use "<key>" tag.
+
+Empoyee.java
+RegularEmployee.java
+ContractEmployee.java
+hibernate.cfg.xml
+HBUtil.java
+EmployeeDAO.java take all these files from TPH 1st application.
+
+TablePer Sub Class Using annotation :-
+********************
+=> Specify the InheritanceType as "JOINED".
+=> Configure the foreign key within the child class using @PrimaryKeyJoinColumn annotation.
+
+=> hibernate.cfg.xml
+   *****************
+.....
+<mapping class="com.nit.Employee" />
+<mapping class="com.nit.RegularEmployee" />
+<mapping class="com.nit.ContractEmployee" />
+......
+
+=> HBUtil.java , EmployeeDAO.java take these files from Previous App.
+
+=> Note : Execute the following sql script before running EmployeeDAO.java
+
+delete From RegularEmployeeTPS;
+delete From ContractEmployeeTPS;
+delete From EmployeeTPS;
+commit;

@@ -1,0 +1,31 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+<class name="com.datageeks.dao.Employee" table="EMPLOYEETPS" >
+
+<id name="empId" column="EMPID">
+<generator class="assigned">
+</generator>
+</id>
+
+
+<property name="empName" column="EMPNAME"></property>
+
+<joined-subclass name="com.datageeks.dao.RegularEmployee" table="REGULAREMPLOYEETPS"  >
+<key column="Emp_Fk_Id"></key>
+<property name="salary" column="SALARY"></property>
+<property name="bonus" column="BONUS"></property>
+</joined-subclass>
+
+<joined-subclass name="com.datageeks.dao.ContractEmployee"  table="CONTRACTEMPLOYEETPS"  >
+<key column="Emp_Fk_Id"></key>
+<property name="payPerHour" column="PAYPERHOUR"></property>
+<property name="contractPeriod" column="CONTRACTPERIOD"></property>
+</joined-subclass>
+
+</class>
+
+</hibernate-mapping>

@@ -1,0 +1,308 @@
+	Working with Bulk Operations :-
+	*****************************
+
+=> Using "org.hibernate.Session" we can select only one record at a time.
+
+=>Similarly insert,update,deleting also can be done only on one record at the same time.
+
+=> We can use following api to perform bulk operations.
+
+	Bulk operations includes selecting,deleting,updating more than one record at the same time.
+
+	**Hibernate Query Language (HQL)
+	**Criteria API 
+	** Native SQL.
+
+
+**Hibernate Query Language (HQL)                                       
+********************************
+
+=> HQL language is same as SQL languge.
+=>But the SQL language is depending on database table where as HQL language dependes on Persistence class.
+=> SQL language is database dependent where as HQL language is database independent.
+=>The HQL language is converted into SQL language by the Hibernate Engine while submiting the query to the database.
+
+=> To work with HQL , hiberante has given org.persistence.TypedQuery api. This is deprecated.
+
+=> So we make used of "org.persistence.TypedQuery" object.
+
+=>The org.hiberante.Session containes following method which can return the TypedQuery Object.
+
+public Query createQuery(String hql,Class);
+
+=>org.persistence.TypedQuery :-
+  *******************
+	public Object getResultList() :-
+	********************
+		This method of org.persistence.TypedQuery object can be used to submit the HQL Query .
+
+Sql Script :-
+*********
+drop table Product;
+create table Product(pid number(10) Primary Key,pname varchar2(10),price number(10,2));
+
+insert into Product values(111,'Lenovo',35000);
+insert into Product values(222,'HP',25000);
+insert into Product values(333,'Apple',50000);
+insert into Product values(444,'Lenovo-I5',45000);
+insert into Product values(555,'Apple-MAC',60000);
+insert into Product values(666,'HP-I5',56000);
+insert into Product values(777,'Dell',28000);
+
+commit;
+
+
+Case 1 :-
+********
+	Selecting Complete record from the table .
+Ex : Select p From Product as p;
+
+When we select complete record from the table Hibernate Engine will create a Persistence class object for every record of a table then returns List of Persistence class object's.
+
+
+Case 2 :-Projecting the column's.
+******
+
+=> Selecting specific column's from the table :-
+  ********************************************
+When we select specific column's from the table Hibernate Engine will create a Object[] array for every record of a table then returns List of Object[] arrays  i.e List<Object[]>.
+
+ProductDAO.java
+
+CASE 3 :-
+*****   Selecting Single column from the table.
+
+If we select single column from the table HibernateEngine will return List of column type object.
+
+For Ex : If we select productName then the result is 
+	List<String>.
+	similarly for productId result is List<Integer> etc...
+
+
+Case 4 :-
+******
+=> Selecting SingleRow and SingleColumn value.
+
+If the hql query returns SingleRow and SingleColumn value we can directly use following method of "org.persistence.TypedQuery" object to submit the hql query.
+
+
+Select Max(p.productId) From Product as p;
+
+org.persistence.TypedQuery has given "getSingleResult()" method to submit single row , single column query.
+
+
+Sql Script :-
+**********
+Update the ProductNames in the Product table :-
+
+update Product set pname='Apple'  where pname like 'Apple%';
+
+update Product set pname='Lenovo'  where pname like 'Lenovo%';
+
+update Product set pname='HP'  where pname like 'HP%';
+
+commit;
+
+
+SQL> Select * From Product;
+
+       PID PNAME           PRICE
+---------- ---------- ----------
+       111 Lenovo          35000
+       222 HP              25000
+       333 Apple           50000
+       444 Lenovo          45000
+       555 Apple           60000
+       666 HP              56000
+       777 Dell            28000
+
+7 rows selected.
+
+
+=> Selecting minimum and maximum prices of Product based on the Brand.
+
+Making use of  "Group By" Cluase :-
+********************************
+
+String hql = "Select p.productName,min(p.productPrice) , max(p.productPrice) From Product as p Group By p.productName";
+		
+					List<Object[]> objArrayList = null;
+					String hql = " Select p.productName , Min(p.productPrice) , Max(p.productPrice) From Product as p Group By p.productName";
+					Session session = sessionFactory.openSession();
+					TypedQuery<Object[]> query = session.createQuery(hql,Object[].class);
+					objArrayList = query.getResultList();
+					session.close();
+					return objArrayList;
+
+Making use of "Having" Clause :-
+****************************
+
+"Having" Clause can be appied on "Group By".
+
+Get me the ProductNames whose maximum price is greater than 50000.00
+
+					List<Object[]> objArrayList = null;
+					String hql = " Select p.productName , Max(p.productPrice) From Product as p  Group By p.productName Having  Max(p.productPrice) >= 50000 ";
+					Session session = sessionFactory.openSession();
+					TypedQuery<Object[]> query = session.createQuery(hql,Object[].class);
+					objArrayList = query.getResultList();
+					session.close();
+					return objArrayList;
+
+**********************
+Making use of SubQueries :-
+*************************
+SubQuery means writing a query inside a query.
+
+=> Get the Maximum product details ...?
+
+					List<Product> productList = null;
+					String hql = " Select p1 From Product as p1  Where p1.productPrice = (Select Max(p2.productPrice) From Product as p2)";
+					Session session = sessionFactory.openSession();
+					TypedQuery<Product> query = session.createQuery(hql,Product.class);
+					productList = query.getResultList();
+					session.close();
+					return productList;
+	
+	=> Working with pagination :-
+   ***********************
+=> Pagination is cocept of organizing records in the formpage based on the User Selection.
+
+=> To work with pagination org.persistence.TypedQuery object has given following two methods.
+
+public void setFirstResult(int rowNum) :-
+****************************************
+	Here the rowNumber will be starting from "0" onwards. This method can used to specify the record row number.
+
+public void setMaxResults(int maxCount):-
+****************************************
+	This method can be used to specify how many records needs to retrieved from the specidied rownumber.
+
+For Ex:- 
+	query.setFirstResult(3); 
+	query.setMaxResults(3);
+	query.list();
+
+Here Hibernate Engine return's 3 records from the row number 3rd.
+
+Row number 3rd means record number "4".
+
+Ex:-
+***
+	query.setFirstResult(2); 
+	query.setMaxResults(3);
+	query.list();
+Here Hibernate Engine return's 3 records from the row number 2nd.
+
+Row number 2nd means record number "3".
+
+
+Sample Code for Pagination :-
+***************************
+					List<Product> productList = null;
+					String hql = "Select p From Product as p";
+					Session session = sessionFactory.openSession();
+					TypedQuery<Product> query = session.createQuery(hql,Product.class);
+					query.setFirstResult(2);
+					query.setMaxResults(3);
+					productList = query.getResultList();
+					session.close();
+					return productList;
+
+Working wiht positional parameters :-
+**********************************
+HQL supports positional parameters. Here the positional parameter number will starts from "0" onwards.
+
+=>To bind the values to positional parameters we need to call setParameter(int,XXX) methods on the "TypedQuery" object.
+Here First Parameter represents index number.
+
+
+**********
+Sample Code :-
+************
+					List<Product> productList = null;
+					String hql = "Select p From Product as p Where upper(p.productName) like ?";
+					Session session = sessionFactory.openSession();
+					TypedQuery<Product> query = session.createQuery(hql,Product.class);
+					query.setParameter(0, "%"+name.toUpperCase()+"%");
+					productList = query.getResultList();
+					session.close();
+					return productList;
+
+Working with NamedParameters :-
+*****************************
+Hibernate has given support to work with named parametes. 
+Here every position can be identified by one unique name.
+Allways the named parameter will starts with ":" symbol.
+
+To work with named parameters make use of "public void setParamter(String , XXX) method of TypedQuery".
+
+Here First Parameter represents NamedParameter name.
+
+Sample Code :-
+***********
+				public List<Product> NamedParams(String name)
+				{
+					List<Product> productList = null;
+					String hql = "Select p From Product as p Where upper(p.productName) like :proName ";
+					Session session = sessionFactory.openSession();
+					TypedQuery<Product> query = session.createQuery(hql,Product.class);
+					query.setParameter("proName", "%"+name.toUpperCase()+"%");
+					productList = query.getResultList();
+					session.close();
+					return productList;
+				}
+				
+
+Working with NamedQueries :-
+*************************
+** Using NamedQueries we can reuse the Same Hql query more than once.
+
+**We can implement NamedQueries in two ways 
+	1.using XML configuration
+	2.using annotations .
+
+
+1.using XML configuration :-
+  **********************
+	Here we will just configure the "HQL query" within the mapping file using "<query>" tag.
+
+2.using annotations .
+********************
+	Can be done using below ::
+
+@NamedQueries
+(
+		{
+			@NamedQuery(name="findProducts" ,query = " Select  p From ProductBean as p"),
+			@NamedQuery(name="maxPrice", query = " Select  max(p.productPrice) From ProductBean as p ")
+		}
+)
+
+
+Implementing Product Serach Criteria impletation on back end :
+****************************************************
+
+Working with Non-Select Queries in HQL :-
+**************************************
+=> To work with "Non-Select queries" org.hibernate.Query interface has given 
+"public int executeUpdate(String hql)" method.
+
+=> This method will return updated records  count.
+
+=>All the Non-Select Queries should be submited within the Transaction.
+
+Sample Code :-
+***********
+String hql = "Update Product as p set p.productPrice = p.productPrice + :price  Where p.productName like :pname";
+	Session session = HBUtil.getSessionFactory().openSession();
+			
+	Query query = session.createQuery(hql);
+	query.setFloat("price", 2000f);
+	query.setString("pname", "%HP%");
+	session.beginTransaction();
+	int count = query.executeUpdate();
+	session.getTransaction().commit();		
+			session.close();
+System.out.println("\n\n updated Count is : +count);
+	

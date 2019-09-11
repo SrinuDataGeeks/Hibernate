@@ -1,0 +1,7 @@
+Criteria API ::
+
+https://www.boraji.com/hibernate-5-criteria-query-example
+
+Native SQL
+
+https://www.boraji.com/hibernate-5-native-sql-query-example

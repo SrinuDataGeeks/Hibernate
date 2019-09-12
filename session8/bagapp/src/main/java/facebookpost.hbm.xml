@@ -1,0 +1,27 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+<class name="com.datageeks.dao.FacebookPost" table="FACEBOOKPOSTBAG" >
+
+<id name="postId" column="POSTID">
+<generator class="increment">
+</generator>
+</id>
+
+
+<property name="postName" column="POSTINFO"></property>
+
+<property name="postedBy" column="POSTEDBY"></property>
+
+<bag name="comments" table="FACEBOOKPOSTCOMMENTBAG">
+<key column="POST_FK_ID"></key>
+<element column="COMMENTINFO" type="java.lang.String"></element>
+</bag>
+
+
+</class>
+
+</hibernate-mapping>

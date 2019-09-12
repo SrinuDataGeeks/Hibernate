@@ -1,0 +1,202 @@
+=> Working with java.util.List :-
+   ***************************
+	=>List is an index based.
+	=>List maintains insertion order.
+	=>List allows nullable elements.
+	=>List also allows duplicate elements.
+	=>List data is non synchrinized.(i.e Multiple Threads can access the data at the same time).
+
+To work java.util.List hibernate has given "<list> and <bag> " tags.
+
+Working with "<list>" tag.
+***********************
+=> Generally we will maintain collection type of data in within seperate table.
+
+=> For Example "One FbPost contains many comments".
+	So that we can not keep all comments of perticular post in single column so that we will maintain seperate table for comments.
+
+=> Within the comments table every comment will be referred to the "FbPost" id using foreign key.
+
+
+<list> tag structure :-
+*********************
+
+<list name="..."  table=".." >
+<key column="Fk_Column" />
+<index column="index_Column" />
+<element column="element_Column"  type=".." />
+</list>
+
+**"java.util.List" is an index based so that with the table we should take "index_Column" additionally.
+
+**Within the <list> tag we can specify the forign key using "<key>" tag.
+
+** Index column can be specified using "<index>" tag.
+
+**If the "java.util.List" contains premitive type of data we can make use of "<element>" tag to map the result column .
+
+**If the "java.util.List" contains user defined objects of data we can make use of "<one-to-many>" tag to map the result column .
+
+=> Sql Script
+***************
+Drop Table FacebookPostComment;
+Drop Table FacebookPost;
+create table FacebookPost(PostId number(10) Primary Key , PostInfo varchar2(35) ,postedBy varchar2(20));
+
+create table FacebookPostComment(Post_FK_Id number(10) references FacebookPost(PostId) , Comment_Index number(10) ,commentInfo varchar2(35));
+
+
+
+hibernate.cfg.xml
+***************
+....
+....
+<mapping resource="FacebookPost.hbm.xml" />
+....
+....
+
+
+HBUtil.java (take it from previous appliation)
+
+FacebookDAO.java
+****************
+Fecching Complete Posts :-
+************************
+
+
+Seleting Single Post :-
+********************
+
+Deleting all the Posts :-
+**********************
+
+
+Deleting Single Post :-
+********************
+
+**************************************************
+
+Understanding Lazy Loading and Eager Loading in collection Type :-
+************************************************
+=> Every collection tag i.e <list>,<bag>,<set> ,<map> has "lazy" attribute.
+
+By default the "lazy=true" so that Hibernate Engine performs lazy-loading.
+
+
+lazy-loading :-
+*************  At the time of selecting Parent record the child records(i.e collection data) are not loaded.
+
+		For Ex:-
+public class FacebookPost implements Serializable{
+	private Integer postId = null;
+	private String postInfo = null;
+	private String postedBy = null;
+	private List<String> comments = null;
+setter and getters 
+			}
+
+Here the FacebookPost object contains only the postId,postInfo and postedBy.
+
+The FacebookPost object does not contains comments i.e "List<String>" .
+
+Becuase bydefault 
+<list name="comments" table="FacebookPostComment"  
+lazy="true">  
+so that the comments are not loaded from  FacebookPostComment table.
+
+=> On the FacebookPost object when we call "getComments()" method then  Hibernate Engine gets the data from the FacebookPostComment table.
+
+=>On the FacebookPost object If we call "getComments()" after closing the "org.hibernate.Session" then we will get Lazy-Initialization exception.
+
+Eager Loading :-
+**************
+=> If we make the lazy attribute value as "false"
+ then Hibernate engine performs "Eager Loading".
+
+=> So that at the time of parent record selecting only all the child data will be loaded.
+
+=> According to the standards we will allways makes "lazy=false" because we can avoid Lazy-Initialization exception.
+
+<bag> tag :-
+**********
+=> <bag> tag also can be used to map "java.util.List" type of data.
+
+=> If we use <bag> tag we no need to maintain the index_column on table.
+
+sqlscript :-
+***********
+Drop table FacebookPostCommentBag;
+Drop Table FacebookPostBag;
+
+create table FacebookPostBag(PostId number(10) Primary Key , PostInfo varchar2(35) ,postedBy varchar2(20));
+
+create table FacebookPostCommentBag(Post_FK_Id number(10) references FacebookPostBag(PostId) ,commentInfo varchar2(35));
+
+Chage the "FacebookPost.hbm.xml" file in the FacebookPost application.
+
+Working with java.util.Set :- 
+**************************
+=> java.util.Set is not an index based.
+=> Set does not allows duplicate values.
+=> Set allows nullable values.
+=> Set data is non-synchronized.
+
+Set interface have three implementation classes
+
+	HashSet :- java.util.HashSet does not maintains insetion order.
+
+	LinkedHashSet :- LinkedHashSet maintains insertion order.
+
+HashSet and LinkedHashSet can allow any type of data.
+
+	TreeSet :-
+        ********
+	**TreeSet allows only Integer values.
+	**TreeSet does not allows nullable values.
+	**TreeSet maintains data in assending order by default.
+
+
+=> To map the "java.util.Set" type of data we will make use of "<set>" tag.
+
+<set> tag structure :-
+*********************
+
+<set name="..."  table=".." lazy="false" >
+<key column="Fk_Column" />
+<element column="element_Column"  type=".." />
+</set>
+
+**If the "java.util.Set" contains premitive type of data we can make use of "<element>" tag to map the result column .
+
+**If the "java.util.Set" contains user defined objects of data we can make use of "<one-to-many>" tag to map the result column .
+
+sqlscript :-
+***********
+Drop  Table FacebookPostCommentSet;
+
+Drop Table FacebookPostSet;
+
+create table FacebookPostSet(PostId number(10) Primary Key , PostInfo varchar2(35) ,postedBy varchar2(20));
+
+create table FacebookPostCommentSet(Post_FK_Id number(10) references FacebookPostSet(PostId) ,commentInfo varchar2(35));
+
+========================================
+
+=> With the FacebookPost.java take "Set<String> comments".
+
+=>Within the FacebookPostDAO return  "javaComment's and HibernateComment's" in the form of Set<String>.
+
+=>Within the Facebook.hbm.xml file make use of "<set>" to map the "Set<String> comments".
+
+<hibernate-mapping>
+<class name="com.nit.FacebookPost" 
+table="FacebookPostSet">
+....
+....
+<set name="comments" table="FacebookPostCommentSet"  
+lazy="false">
+<key column="post_fk_Id"></key>
+<element column="commentInfo" type="java.lang.String"></element>
+</set>
+</class>
+</hibernate-mapping>

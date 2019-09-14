@@ -1,0 +1,23 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+<class name="com.datageeks.dao.Employee" table="EMPLOYEE" >
+
+<id name="employeeId" column="EMP_ID">
+<generator class="assigned">
+</generator>
+</id>
+
+
+<property name="employeeName" column="EMP_NAME"></property>
+
+<property name="employeeDesg" column="EMP_DESG"></property>
+
+<many-to-one name="department" class="com.datageeks.dao.Department" column="DEPT_FK_ID" lazy="false"></many-to-one>
+
+</class>
+
+</hibernate-mapping>

@@ -1,0 +1,213 @@
+Working with java.util.Set :- 
+**************************
+=> java.util.Set is not an index based.
+=> Set does not allows duplicate values.
+=> Set allows nullable values.
+=> Set data is non-synchronized.
+
+Set interface have three implementation classes
+
+	HashSet :- java.util.HashSet does not maintains insetion order.
+
+	LinkedHashSet :- LinkedHashSet maintains insertion order.
+
+HashSet and LinkedHashSet can allow any type of data.
+
+	TreeSet :-
+        ********
+	**TreeSet allows only Integer values.
+	**TreeSet does not allows nullable values.
+	**TreeSet maintains data in assending order by default.
+
+
+=> To map the "java.util.Set" type of data we will make use of "<set>" tag.
+
+<set> tag structure :-
+*********************
+
+<set name="..."  table=".." lazy="false" >
+<key column="Fk_Column" />
+<element column="element_Column"  type=".." />
+</set>
+
+**If the "java.util.Set" contains premitive type of data we can make use of "<element>" tag to map the result column .
+
+**If the "java.util.Set" contains user defined objects of data we can make use of "<one-to-many>" tag to map the result column .
+
+sqlscript :-
+***********
+Drop  Table FacebookPostCommentSet;
+
+Drop Table FacebookPostSet;
+
+create table FacebookPostSet(PostId number(10) Primary Key , PostInfo varchar2(35) ,postedBy varchar2(20));
+
+create table FacebookPostCommentSet(Post_FK_Id number(10) references FacebookPostSet(PostId) ,commentInfo varchar2(35));
+
+========================================
+
+=> With the FacebookPost.java take "Set<String> comments".
+
+=>Within the FacebookPostDAO return  "javaComment's and HibernateComment's" in the form of Set<String>.
+
+=>Within the Facebook.hbm.xml file make use of "<set>" to map the "Set<String> comments".
+
+<hibernate-mapping>
+<class name="com.nit.FacebookPost" 
+table="FacebookPostSet">
+....
+....
+<set name="comments" table="FacebookPostCommentSet"  
+lazy="false">
+<key column="post_fk_Id"></key>
+<element column="commentInfo" type="java.lang.String"></element>
+</set>
+</class>
+</hibernate-mapping>
+
+java.util.Map :-
+**************
+	=>Map is an index based.
+	=>Map allows key and value pairs.
+	=>Map does not allows duplicate keys but allows duplicate values.
+	=>Map allows nullable key and nullable values.
+	=>Map can allow any type of data.
+	=>We can make Map as type safe collection using generics.
+	=>Map data is non-synchronized.
+
+Map has three implementation classes.
+
+	=>HashMap
+	 *********
+	HashMap does not maintains insertion order
+
+	=>LinkedHashMap
+	  ****************
+	LinkedHashMap maintains insertion order
+	
+=> TreeMap :-
+   *******
+	=> TreeMap allows only Integer keys.
+	=> TreeMap allows any type of value.
+	=> TreeMap does not allows nullable key's.
+	=> TreeMap assigns the data in assending order based on key.
+
+
+=>We can not get the data from the "java.util.Map" directly.
+=> First we need to load all the key's of a Map into a "java.util.Set".
+=> Then we can get the value from "Map" using "Key".
+
+java.util.Map methods
+**************
+public V put(K,V) :- Used to add the key and value 			pair into the Map.
+public Set<K>  keySet():- Returns Set of key's.
+
+public V get(K) :- Returns value based on the Key.
+
+Sample Code :-
+Map<String,String> map = new LinkedHashMap<String,String>();
+map.put("HI","Srinu");
+.....
+....
+Set<String>  set = map.keySet();
+for(String key : set)
+	{
+String value = map.get(key);
+System.out.println(key +"\t"+value);
+	}
+
+
+**************************
+Hibernate has given <map> tag to map the "java.util.Map" object.
+
+=>"java.util.Map" is an index based so that "<map>" tag contains "<index>" tag
+
+=> The key of the Map can be represented by "<index>" tag.
+
+=> The value of the Map can be represented by "<element>" tag.
+
+<map> tag structure :-
+**********************
+	<map name=".."  table="..">
+	<key column="FK_ID" />
+	<index column=".." type=".." />
+	<element column=".." type=".." />
+	</map>
+
+sqlscript :-
+***********
+
+Drop table FacebookPostCommentMap;
+
+Drop Table FacebookPostMap;
+
+create table FacebookPostMap(PostId number(10) Primary Key , PostInfo varchar2(35) ,postedBy varchar2(20));
+
+create table FacebookPostCommentMap(Post_FK_Id number(10) references FacebookPostMap(PostId) ,fbcomment varchar2(35),commentedBy varchar2(15));
+
+hibernate.cfg.xml
+FacebookApp.java take these two files from 
+java.util.List Application.
+
+
+
+Understanding <one-to-many> and <many-to-one> Relationships :-
+*************************************************
+
+Here one Department contains Many Employees so that 
+From the Department to Employee we will be having <one-to-many> relation ship.
+
+Department.hbm.xml
+******************
+.......
+<set name="employeesSet" table="Employee"
+cascade="all">
+<key column="Dept_Fk_Id"></key>
+<one-to-many class="com.nit.Employee"/>
+</set>
+.....
+
+**Many Employees are belongs to Single Department so taht  From Employee to Department we will be having <many-to-one> relationship.
+
+Employee.hbm.xml
+*****************
+......
+......
+<many-to-one name="dept" class="com.nit.Department" 
+column="Dept_Fk_Id"></many-to-one>
+.....
+
+sql script :-
+**********
+drop table Employee ;
+drop table Department;
+
+create table Department(Dept_Id number(10) Primary Key , Dept_Name varchar2(30));
+
+create table Employee(Emp_Id number(10) Primary Key , Emp_Name varchar2(15) ,Emp_Desg varchar2(15) , Dept_Fk_Id number(10) references Department(Dept_Id));
+
+
+
+hibernate.cfg.xml :-
+*****************
+.....
+.....
+<mapping resource="Department.hbm.xml" />
+<mapping resource="Employee.hbm.xml" />
+......
+......
+Application For <one-to-many> relationship.
+******************************************
+This is nothing but saving "com.nit.Department" object.
+
+HBUtil.java(take it from previous app)
+
+DepartmentDAO.java
+******************
+
+Run the DepartmentApp.java
+checks the records in the Department and Employee tables.
+
+ApplicationCode for <many-to-one> relationship :-
+***********************************************
+This is nothing but storing the Employee record in to the table.

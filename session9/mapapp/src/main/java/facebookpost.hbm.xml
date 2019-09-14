@@ -1,0 +1,28 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"> 
+
+<hibernate-mapping>
+<class name="com.datageeks.dao.FacebookPost" table="FACEBOOKPOSTMAP" >
+
+<id name="postId" column="POSTID">
+<generator class="increment">
+</generator>
+</id>
+
+
+<property name="postName" column="POSTINFO"></property>
+
+<property name="postedBy" column="POSTEDBY"></property>
+
+<map name="comments" table="FACEBOOKPOSTCOMMENTMAP" lazy="false">
+<key column="POST_FK_ID"></key>
+<index column="FBCOMMENT" type="java.lang.String"></index>
+<element column="COMMENTEDBY" type="java.lang.String"></element>
+</map>
+
+
+</class>
+
+</hibernate-mapping>

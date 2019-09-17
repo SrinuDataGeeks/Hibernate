@@ -1,0 +1,25 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.datageeks.dao.OrderDetails" table="ORDER_DETAILS">
+
+		<id name="orderDetailsId" column="ORDER_DETAILS_ID">
+			<generator class="foreign">
+			<param name="property">orderRef</param>
+			</generator>
+		</id>
+
+
+		<property name="city" column="CITY"></property>
+		
+		<property name="location" column="LOCATION"></property>
+
+		<one-to-one name="orderRef"
+			class="com.datageeks.dao.Order" />
+
+	</class>
+
+</hibernate-mapping>

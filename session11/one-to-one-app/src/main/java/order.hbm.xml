@@ -1,0 +1,24 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.datageeks.dao.Order" table="PLACE_ORDER">
+
+		<id name="orderId" column="ORDER_ID">
+			<generator class="assigned">
+			</generator>
+		</id>
+
+
+		<property name="orderBy" column="ORDER_BY"></property>
+
+		<one-to-one name="orderDetailsRef"
+			class="com.datageeks.dao.OrderDetails" cascade="all" lazy="false">
+			
+			</one-to-one>
+
+	</class>
+
+</hibernate-mapping>

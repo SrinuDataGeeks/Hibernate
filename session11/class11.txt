@@ -1,0 +1,44 @@
+<one-to-one> relationship :-
+**************************
+=> It is the relationship between Primary_Key to Primary_Key.
+
+=> Here the OrderDetails can not be existed without "Order" and vice versa.
+
+=>So there is a one-to-one relationship between them.
+
+=>The OrderDetials Id needs to generated based on the "Order" id so that we can make use of "foreign" generator within the "OrderDetails.hbm.xml" file.
+
+=>When we register the "Order" then with the same id the OrderDetails will be inserted into the table.
+
+=>This job internally taken care by the "foreign" generator.
+
+XML Sql Script :-
+************
+Drop Table Order_Details;
+Drop Table Place_Order;
+create table Place_Order(Order_Id number(10) Primary Key,Order_By Varchar(15));
+
+create table Order_Details(Order_Details_Id number(10) Primary Key  references Place_Order(Order_Id),City Varchar(15),Location Varchar(15));
+
+<one-to-one> relationship using annotations :-
+********************************************
+=>To map <one-to-one> relationship make use of "@OneToOne" annotation.
+
+=> This is the relationship between PrimaryKey to PrimaryKey so that we should make use of "@PrimaryKeyJoinColumn" annotation.
+
+
+
+HBUtil.java( take it from previous app).
+
+OrderDAO.java
+Change the orderid value as "222" then run the OrderDAO class.
+
+Annotations SQL Script:
+
+
+Drop Table Order_Details;
+Drop Table Place_Order;
+create table Order_Details(Order_Details_Id number(10) Primary Key ,City Varchar(15),Location Varchar(15));
+create table Place_Order(Order_Id number(10) Primary Key,Order_By Varchar(15),Order_Details_FK_Id number(10)   references Order_Details(Order_Details_Id));
+
+

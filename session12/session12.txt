@@ -1,0 +1,38 @@
+<one-to-one> relationship using annotations :-
+********************************************
+=>To map <one-to-one> relationship make use of "@OneToOne" annotation.
+
+
+
+refer onetoone diagram
+
+sql script
+Drop Table EMPLOYEE ;
+Drop Table ADDRESS;
+Create Table ADDRESS(ADDR_ID number(10) PRIMARY KEY, H_NO number(10),STREET varchar2(15),CITY varchar2(15),PIN_CODE number(6) );
+Create Table EMPLOYEE(EMP_ID number(10) Primary Key,EMP_NAME varchar2(15), EMP_EMAIL varchar2(15),ADDR_FK_ID number(10) references ADDRESS(ADDR_ID),Constraint ADDR_FK_ID_UNIQUE UNIQUE ADDR_FK_ID) );
+
+<many-to-many> Relationship :-
+****************************
+=>Oracle does not support <many-to-many> Relationship directly.
+
+=> The combination of one-to-many and one-to-many can be act as a many-to-many relationship.
+
+=>For Ex : 
+	One Student contains many Courses.
+
+	One Couse can belongs to many Students.
+
+As a unit we can maintain <many-to-many> Relationship between "Student" and the "Course"
+
+
+refer manytomany diagram
+
+HBUtil.java (take it from previous application)
+
+sql script :-
+************
+Drop Table STUDENT_COURSE;
+CREATE TABLE STUDENT(STUDENT_ID number(10) Primary Key , STUDENT_NAME Varchar2(15));
+CREATE TABLE COURSE(COURSE_ID number(10) Primary Key , COURSE_NAME Varchar2(15));
+CREATE TABLE STUDENT_COURSE(STUDENT_FK_ID number(10) references STUDENT(STUDENT_ID), COURSE_FK_ID  number(10) references COURSE(COURSE_ID) );

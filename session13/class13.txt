@@ -1,0 +1,83 @@
+﻿Working with Composit - Primary Key's :-
+**************************************
+
+=> On the database table end we can have more than one primary key.
+
+=> We can say them as Composit primary key's.
+
+sql script :-
+**********
+create table UserInfo( Country varchar2(10),State varchar2(10) ,user_Name varchar2(10) ,Primary Key(Country,State));
+
+
+Here the Primary Key constraint is applied on both "Country"  and  "State" columns.
+
+	So that the combination of "Country" and "State" should not be repeated with the table.
+
+sample Data :-
+Country State User_Name 
+INDIA   T.G   Srinu (Accepted)
+INDIA   A.P   Venu  (Accepted)
+INDIA   T.G   Arup (Not Accepted because the Country and state combination is already repeated.)
+
+To map the Composite Primary key's in hibrnate mapping file we will make use of "<composite-id>" tag.
+
+=> First level cache will be enabled by default, but for enable second level cache we need to follow some settings, let us see few points regarding this..
+ 
+Second level cache was introduced in hibernate 3.0
+
+=>When ever we are loading any object from the database,  then hibernate verify whether that object is available in the local cache memory of that particular session [ means first level cache ], if not available then hibernate verify whether the object is available in global cache or factory cache [ second level cache ], if not available then hibernate will hit the database and loads the object from there, and then first stores in the local cache of the session [ first level ] then in the global cache [ second level cache ]
+
+When another session need to load the same object from the database,  then hibernate copies that object from global cache [ second level cache ] into the local cache of this new session
+ 
+Second level cache in the hibernate is of  from 4 vendors…
+*********************************
+1.Easy Hibernate [EHCache] Cache from hibernate framework
+2.Open Symphony [OS] cache from Open 3.Symphony SwarmCache
+4.TreeCache from JBoss
+ 
+How to enable second level cache in hibernate
+**************************************
+
+We need one provider class, here we are going to see hibernate provider class that is EHCache
+ 
+Changes required
+******************
+
+To enable second level cache in the hibernate, then the following  changes are required
+
+1. Add the eh-cache dependencies in the pom.xml
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache</artifactId>
+			<version>2.10.3</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>5.4.0.Final</version>
+		</dependency>
+
+2. Add provider class in hibernate configuration file like…
+
+<property name="cache.use_second_level_cache">true</property>
+<property name="cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>
+		
+
+3. Make use of @Cache and @Cacheble annotations in the required persistence classes
+
+@Entity
+@Table(name = "PRODUCT")
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+public class ProductBean  implements Serializable {
+....
+...
+}
+
+
+
+
